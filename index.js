@@ -22,6 +22,10 @@ app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.get('/', (req, res) => {
+	res.send({ promvote: 'says hi' });
+});
+
 // Authentication route handlers
 require('./routes/authRoutes')(app);
 
