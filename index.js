@@ -10,7 +10,7 @@ const app = express();
 // Passport config
 require('./services/passport');
 
-// Wire up middlwares for passport ussage
+// Wire up middlwares for passport
 app.use(
 	cookieSession({
 		maxAge: 30 * 24 * 60 * 60 * 1000,
