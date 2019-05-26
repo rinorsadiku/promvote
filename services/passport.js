@@ -1,9 +1,38 @@
 const passport = require('passport');
 const keys = require('../config/keys');
 
+const mongoose = require('mongoose');
+const User = mongoose.model('users');
+
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 const InstagramStrategy = require('passport-instagram').Strategy;
+
+// Helper function to finalize the authentication process
+const authenticate = async (accessToken, refreshToken, profile, done) => {
+	const existingUser = await User.findOne({ name: profile.displayName });
+
+	if (existingUser) {
+		console.log(`Logged in as ${existingUser.name}`);
+		return done(null, existingUser);
+	}
+
+	const user = await new User({
+		providerId: profile.id,
+		name: profile.displayName,
+		provider: profile.provider
+	}).save();
+
+	return done(null, user);
+};
+
+passport.serializeUser((user, done) => {
+	done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+	User.findById(id).then(user => done(null, user));
+});
 
 // Setting up Google Strategy
 passport.use(
@@ -13,9 +42,7 @@ passport.use(
 			clientSecret: keys.googleClientSecret,
 			callbackURL: '/auth/google/callback'
 		},
-		(accessToken, refreshToken, profile, done) => {
-			console.log(profile);
-		}
+		authenticate
 	)
 );
 
@@ -27,9 +54,7 @@ passport.use(
 			clientSecret: keys.facebookAppSecret,
 			callbackURL: '/auth/facebook/callback'
 		},
-		(accessToken, refreshToken, profile, done) => {
-			console.log(profile);
-		}
+		authenticate
 	)
 );
 
@@ -41,8 +66,6 @@ passport.use(
 			clientSecret: keys.instagramClientSecret,
 			callbackURL: '/auth/instagram/callback'
 		},
-		(accessToken, refreshToken, profile, done) => {
-			console.log(profile);
-		}
+		authenticate
 	)
 );

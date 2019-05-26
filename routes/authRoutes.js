@@ -12,7 +12,7 @@ module.exports = app => {
 		passport.authenticate('google', { failureRedirect: '/' }),
 		(req, res) => {
 			// Successful authentication, redirect to app.
-			res.redirect('/app');
+			res.redirect('/vote');
 		}
 	);
 
@@ -27,7 +27,7 @@ module.exports = app => {
 		passport.authenticate('facebook', { failureRedirect: '/' }),
 		(req, res) => {
 			// Successful authentication, redirect home.
-			res.redirect('/app');
+			res.redirect('/vote');
 		}
 	);
 
@@ -37,9 +37,21 @@ module.exports = app => {
 	app.get(
 		'/auth/instagram/callback',
 		passport.authenticate('instagram', { failureRedirect: '/' }),
-		function(req, res) {
+		(req, res) => {
 			// Successful authentication, redirect home.
-			res.redirect('/app');
+			res.redirect('/vote');
 		}
 	);
+
+	// Logout Route
+	app.get('/api/logout', (req, res) => {
+		// This logout function is attached automatically to the request object by passport
+		req.logout();
+		res.redirect('/');
+	});
+
+	// Fetch Current User
+	app.get('/api/current_user', (req, res) => {
+		res.send(req.user);
+	});
 };

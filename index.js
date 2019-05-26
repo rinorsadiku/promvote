@@ -1,8 +1,20 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const keys = require('./config/keys');
-const bodyParser = require('body-parser');
-const passport = require('passport');
+
+// Require in all the models
+require('./models/User');
+require('./models/Vote');
+
+// Setup database connection
+mongoose.connect(keys.mongoURI, { useNewUrlParser: true });
+
+mongoose.connection
+	.once('open', () => console.log('Database connection has been established'))
+	.on('error', error => console.log('Warning: ', error));
 
 // Generate an express app
 const app = express();
@@ -28,6 +40,7 @@ app.get('/', (req, res) => {
 
 // Authentication route handlers
 require('./routes/authRoutes')(app);
+require('./routes/voteRoutes')(app);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT);
